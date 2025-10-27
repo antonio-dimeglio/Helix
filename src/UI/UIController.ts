@@ -37,7 +37,6 @@ export class UIController {
     // Control elements
     private colorSchemeSelect!: HTMLSelectElement;
     private renderSelect!: HTMLSelectElement;
-    private sampleProteinSelect!: HTMLSelectElement;
     private pdbFileInput!: HTMLInputElement;
     private pdbSearchInput!: HTMLInputElement;
     private fetchBtn!: HTMLButtonElement;
@@ -85,7 +84,6 @@ export class UIController {
         // Control elements
         this.colorSchemeSelect = document.getElementById("colorScheme") as HTMLSelectElement;
         this.renderSelect = document.getElementById("representation") as HTMLSelectElement;
-        this.sampleProteinSelect = document.getElementById("sampleProtein") as HTMLSelectElement;
         this.pdbFileInput = document.getElementById("pdbFile") as HTMLInputElement;
         this.pdbSearchInput = document.getElementById("pdbSearch") as HTMLInputElement;
         this.fetchBtn = document.getElementById("fetchBtn") as HTMLButtonElement;
@@ -113,25 +111,6 @@ export class UIController {
         this.renderSelect.addEventListener('change', () => {
             const newMode = this.renderSelect.value as RenderMode;
             this.onRenderModeChange(newMode);
-        });
-
-        // Sample protein selection
-        this.sampleProteinSelect.addEventListener('change', () => {
-            const pdbId = this.sampleProteinSelect.value;
-            if (!pdbId) return;
-
-            fetch(`/proteins/${pdbId}.pdb`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to load sample protein');
-                    return response.text();
-                })
-                .then(pdbContent => {
-                    this.loadProteinFromContent(pdbContent, pdbId.toUpperCase());
-                })
-                .catch(error => {
-                    console.error('Error loading sample:', error);
-                    alert('Failed to load sample protein');
-                });
         });
 
         // File upload

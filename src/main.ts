@@ -79,9 +79,3 @@ window.addEventListener('resize', updateRendererSize);
 
 animate(performance.now());
 
-fetch('/proteins/1crn.pdb')
-    .then(response => response.text())
-    .then(pdbContent => {
-        controller.loadProteinFromContent(pdbContent, '1CRN');
-    });
-
