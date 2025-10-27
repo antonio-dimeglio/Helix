@@ -1,0 +1,941 @@
+{
+  "ALA": {
+    "code": "ALA",
+    "name": "Alanine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "N",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ]
+    ]
+  },
+  "ARG": {
+    "code": "ARG",
+    "name": "Arginine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD",
+      "CG",
+      "CZ",
+      "N",
+      "NE",
+      "NH1",
+      "NH2",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "CD"
+      ],
+      [
+        "CD",
+        "NE"
+      ],
+      [
+        "NE",
+        "CZ"
+      ],
+      [
+        "CZ",
+        "NH1"
+      ],
+      [
+        "CZ",
+        "NH2"
+      ]
+    ]
+  },
+  "ASN": {
+    "code": "ASN",
+    "name": "Asparagine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CG",
+      "N",
+      "ND2",
+      "O",
+      "OD1"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "OD1"
+      ],
+      [
+        "CG",
+        "ND2"
+      ]
+    ]
+  },
+  "ASP": {
+    "code": "ASP",
+    "name": "Aspartate",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CG",
+      "N",
+      "O",
+      "OD1",
+      "OD2"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "OD1"
+      ],
+      [
+        "CG",
+        "OD2"
+      ]
+    ]
+  },
+  "CYS": {
+    "code": "CYS",
+    "name": "Cysteine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "N",
+      "O",
+      "SG"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "SG"
+      ]
+    ]
+  },
+  "GLN": {
+    "code": "GLN",
+    "name": "Glutamine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD",
+      "CG",
+      "N",
+      "NE2",
+      "O",
+      "OE1"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "CD"
+      ],
+      [
+        "CD",
+        "OE1"
+      ],
+      [
+        "CD",
+        "NE2"
+      ]
+    ]
+  },
+  "GLU": {
+    "code": "GLU",
+    "name": "Glutamate",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD",
+      "CG",
+      "N",
+      "O",
+      "OE1",
+      "OE2"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "CD"
+      ],
+      [
+        "CD",
+        "OE1"
+      ],
+      [
+        "CD",
+        "OE2"
+      ]
+    ]
+  },
+  "GLY": {
+    "code": "GLY",
+    "name": "Glycine",
+    "atoms": [
+      "C",
+      "CA",
+      "N",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "C",
+        "O"
+      ]
+    ]
+  },
+  "HIS": {
+    "code": "HIS",
+    "name": "Histidine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD2",
+      "CE1",
+      "CG",
+      "N",
+      "ND1",
+      "NE2",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "ND1"
+      ],
+      [
+        "CG",
+        "CD2"
+      ],
+      [
+        "ND1",
+        "CE1"
+      ],
+      [
+        "CD2",
+        "NE2"
+      ],
+      [
+        "CE1",
+        "NE2"
+      ]
+    ]
+  },
+  "ILE": {
+    "code": "ILE",
+    "name": "Isoleucine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD1",
+      "CG1",
+      "CG2",
+      "N",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG1"
+      ],
+      [
+        "CB",
+        "CG2"
+      ],
+      [
+        "CG1",
+        "CD1"
+      ]
+    ]
+  },
+  "LEU": {
+    "code": "LEU",
+    "name": "Leucine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD1",
+      "CD2",
+      "CG",
+      "N",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "CD1"
+      ],
+      [
+        "CG",
+        "CD2"
+      ]
+    ]
+  },
+  "LYS": {
+    "code": "LYS",
+    "name": "Lysine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD",
+      "CE",
+      "CG",
+      "N",
+      "NZ",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "CD"
+      ],
+      [
+        "CD",
+        "CE"
+      ],
+      [
+        "CE",
+        "NZ"
+      ]
+    ]
+  },
+  "MET": {
+    "code": "MET",
+    "name": "Methionine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CE",
+      "CG",
+      "N",
+      "O",
+      "SD"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "SD"
+      ],
+      [
+        "SD",
+        "CE"
+      ]
+    ]
+  },
+  "PHE": {
+    "code": "PHE",
+    "name": "Phenylalanine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD1",
+      "CD2",
+      "CE1",
+      "CE2",
+      "CG",
+      "CZ",
+      "N",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "CD1"
+      ],
+      [
+        "CG",
+        "CD2"
+      ],
+      [
+        "CD1",
+        "CE1"
+      ],
+      [
+        "CD2",
+        "CE2"
+      ],
+      [
+        "CE1",
+        "CZ"
+      ],
+      [
+        "CE2",
+        "CZ"
+      ]
+    ]
+  },
+  "PRO": {
+    "code": "PRO",
+    "name": "Proline",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD",
+      "CG",
+      "N",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "N",
+        "CD"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "CD"
+      ]
+    ]
+  },
+  "SER": {
+    "code": "SER",
+    "name": "Serine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "N",
+      "O",
+      "OG"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "OG"
+      ]
+    ]
+  },
+  "THR": {
+    "code": "THR",
+    "name": "Threonine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CG2",
+      "N",
+      "O",
+      "OG1"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "OG1"
+      ],
+      [
+        "CB",
+        "CG2"
+      ]
+    ]
+  },
+  "TRP": {
+    "code": "TRP",
+    "name": "Tryptophan",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD1",
+      "CD2",
+      "CE2",
+      "CE3",
+      "CG",
+      "CH2",
+      "CZ2",
+      "CZ3",
+      "N",
+      "NE1",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "CD1"
+      ],
+      [
+        "CG",
+        "CD2"
+      ],
+      [
+        "CD1",
+        "NE1"
+      ],
+      [
+        "CD2",
+        "CE2"
+      ],
+      [
+        "CD2",
+        "CE3"
+      ],
+      [
+        "NE1",
+        "CE2"
+      ],
+      [
+        "CE2",
+        "CZ2"
+      ],
+      [
+        "CE3",
+        "CZ3"
+      ],
+      [
+        "CZ2",
+        "CH2"
+      ],
+      [
+        "CZ3",
+        "CH2"
+      ]
+    ]
+  },
+  "TYR": {
+    "code": "TYR",
+    "name": "Tyrosine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CD1",
+      "CD2",
+      "CE1",
+      "CE2",
+      "CG",
+      "CZ",
+      "N",
+      "O",
+      "OH"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG"
+      ],
+      [
+        "CG",
+        "CD1"
+      ],
+      [
+        "CG",
+        "CD2"
+      ],
+      [
+        "CD1",
+        "CE1"
+      ],
+      [
+        "CD2",
+        "CE2"
+      ],
+      [
+        "CE1",
+        "CZ"
+      ],
+      [
+        "CE2",
+        "CZ"
+      ],
+      [
+        "CZ",
+        "OH"
+      ]
+    ]
+  },
+  "VAL": {
+    "code": "VAL",
+    "name": "Valine",
+    "atoms": [
+      "C",
+      "CA",
+      "CB",
+      "CG1",
+      "CG2",
+      "N",
+      "O"
+    ],
+    "bonds": [
+      [
+        "N",
+        "CA"
+      ],
+      [
+        "CA",
+        "C"
+      ],
+      [
+        "CA",
+        "CB"
+      ],
+      [
+        "C",
+        "O"
+      ],
+      [
+        "CB",
+        "CG1"
+      ],
+      [
+        "CB",
+        "CG2"
+      ]
+    ]
+  }
+}

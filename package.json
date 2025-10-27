@@ -1,0 +1,23 @@
+{
+  "name": "helix",
+  "version": "0.1.0",
+  "description": "3D Protein Visualization - Journey to Molecular Docking",
+  "type": "module",
+  "homepage": "https://antonio-dimeglio.github.io/Helix",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "devDependencies": {
+    "@types/three": "^0.169.0",
+    "gh-pages": "^6.3.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  }
+}
