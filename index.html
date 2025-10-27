@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helix - Protein Visualization</title>
-  <script type="module" crossorigin src="/Helix/assets/index-giYhjZi6.js"></script>
+  <script type="module" crossorigin src="/Helix/assets/index-BOP6KLNu.js"></script>
   <link rel="stylesheet" crossorigin href="/Helix/assets/index-B6m9ecti.css">
 </head>
 <body>
@@ -22,16 +22,6 @@
 
         <!-- Toolbar -->
         <div class="toolbar">
-            <div class="toolbar-group">
-                <span class="toolbar-label">Protein:</span>
-                <select id="sampleProtein">
-                    <option value="">-- Select --</option>
-                    <option value="1crn">1CRN - Crambin</option>
-                    <option value="1ubq">1UBQ - Ubiquitin</option>
-                    <option value="1hho">1HHO - Hemoglobin</option>
-                </select>
-            </div>
-
             <div class="toolbar-group">
                 <span class="toolbar-label">Style:</span>
                 <select id="representation">
@@ -142,14 +132,6 @@
                     </label>
                 </div>
             </div>
-
-            <div class="panel-section">
-                <div class="panel-title">About</div>
-                <div style="font-size: 12px; color: #a0a0b0; line-height: 1.6;">
-                    <p><strong style="color: #a78bfa;">Helix</strong> is a WebGL-based protein structure viewer.</p>
-                    <p style="margin-top: 8px;">Built with Three.js and TypeScript</p>
-                </div>
-            </div>
         </div>
 
         <!-- Help Modal -->
@@ -163,8 +145,7 @@
                     <section>
                         <h3>Loading Proteins</h3>
                         <ul>
-                            <li><strong>Sample Proteins:</strong> Select from the dropdown in the toolbar (1CRN, 1UBQ, 1HHO)</li>
-                            <li><strong>From RCSB:</strong> Click "Load Protein" or the hamburger menu, enter a PDB ID, and click Fetch</li>
+                            <li><strong>From RCSB:</strong> Click "Load Protein" or the hamburger menu, enter a PDB ID (e.g., 1CRN, 1UBQ, 1HHO), and click Fetch</li>
                             <li><strong>Upload File:</strong> Use the file input in the sidebar to upload your own .pdb file</li>
                         </ul>
                     </section>
