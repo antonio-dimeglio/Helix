@@ -1,6 +1,6 @@
 import { CylinderGeometry, InstancedMesh, Matrix4, Vector3, Quaternion, Color, MeshLambertMaterial } from "three";
-import { Atom } from "../PDBParser/Atom";
-import { AtomBond } from "../PDBParser/Protein";
+import { Atom } from "../Shared/Atom";
+import { AtomBond } from "../Shared/Protein";
 
 const bondRadius = 0.1;
 const bondColor = 0x909090; // Grey

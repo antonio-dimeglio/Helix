@@ -1,7 +1,9 @@
 import { Color, InstancedMesh, Matrix4, SphereGeometry, MeshLambertMaterial } from "three";
-import { Atom } from "../PDBParser/Atom";
+import { Atom } from "../Shared/Atom";
 import { getChainColor, getElementColor, getResidueColor } from "../Utils/ColorScheme";
 import { RenderMode } from "./RenderMode";
+import { ColorScheme } from "./Color/ColorScheme";
+import { ColorContext } from "./Color/ColorContext";
 
 const RADIUS = 0.3;
 const WIDTH = 8;
@@ -37,7 +39,8 @@ export const ColorDispatch: Record<ColorMode, (atom: Atom) => number> = {
 
 export function createAtomsMesh(
     atoms: Atom[],
-    colorMode: ColorMode = ColorMode.Element,
+    colorScheme: ColorScheme,
+    colorContext: ColorContext,
     radius = RADIUS,
     width = WIDTH,
     height = HEIGHT) : InstancedMesh {
@@ -53,7 +56,7 @@ export function createAtomsMesh(
         matrix.makeTranslation(atom.x, atom.y, atom.z);
         instancedMesh.setMatrixAt(i, matrix);
 
-        const colorValue = ColorDispatch[colorMode](atom);
+        const colorValue = colorScheme.getColor(atom, colorContext) as number;
         color.setHex(colorValue);
         instancedMesh.setColorAt(i, color);
     });
@@ -62,12 +65,6 @@ export function createAtomsMesh(
 
     // instanceColor is created lazily by setColorAt, ensure it's updated
     instancedMesh.instanceColor!.needsUpdate = true;
-
-    console.log('Created atoms mesh:', {
-        count,
-        hasInstanceColor: !!instancedMesh.instanceColor,
-        firstColor: instancedMesh.instanceColor?.array.slice(0, 3)
-    });
 
     return instancedMesh;
 }

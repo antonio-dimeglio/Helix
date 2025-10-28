@@ -1,11 +1,53 @@
-export const ELEMENT_COLORS: Record<string, number> = {
+// CPK (Corey-Pauling-Koltun) - Standard element colors
+export const ELEMENT_COLORS_CPK: Record<string, number> = {
     'C': 0x909090,  // Carbon - gray
     'N': 0x3050F8,  // Nitrogen - blue
     'O': 0xFF0D0D,  // Oxygen - red
     'S': 0xFFFF30,  // Sulfur - yellow
     'H': 0xFFFFFF,  // Hydrogen - white
     'P': 0xFF8000,  // Phosphorus - orange
+    'F': 0x90E050,  // Fluorine - green
+    'CL': 0x1FF01F, // Chlorine - green
+    'BR': 0xA62929, // Bromine - dark red
+    'I': 0x940094,  // Iodine - purple
+    'FE': 0xE06633, // Iron - orange
+    'CA': 0x3DFF00, // Calcium - green
 };
+
+// Rasmol - Alternative element colors (black carbon)
+export const ELEMENT_COLORS_RASMOL: Record<string, number> = {
+    'C': 0x000000,  // Carbon - black
+    'N': 0x8F8FFF,  // Nitrogen - light blue
+    'O': 0xFF4500,  // Oxygen - orange-red
+    'S': 0xFFC832,  // Sulfur - gold
+    'H': 0xFFFFFF,  // Hydrogen - white
+    'P': 0xFFA500,  // Phosphorus - orange
+    'F': 0xDAA520,  // Fluorine - goldenrod
+    'CL': 0x00FF00, // Chlorine - green
+    'BR': 0xA52A2A, // Bromine - brown
+    'I': 0x9400D3,  // Iodine - dark violet
+    'FE': 0xFFA500, // Iron - orange
+    'CA': 0x808090, // Calcium - gray
+};
+
+// Jmol - Modern element colors
+export const ELEMENT_COLORS_JMOL: Record<string, number> = {
+    'C': 0x909090,  // Carbon - gray (same as CPK)
+    'N': 0x3050F8,  // Nitrogen - blue
+    'O': 0xFF0D0D,  // Oxygen - red
+    'S': 0xFFFF30,  // Sulfur - yellow
+    'H': 0xFFFFFF,  // Hydrogen - white
+    'P': 0xFF8000,  // Phosphorus - orange
+    'F': 0x90E050,  // Fluorine - light green
+    'CL': 0x1FF01F, // Chlorine - green
+    'BR': 0xA62929, // Bromine - dark red
+    'I': 0x940094,  // Iodine - purple
+    'FE': 0xE06633, // Iron - orange
+    'CA': 0x3DFF00, // Calcium - green
+};
+
+// Default to CPK for backwards compatibility
+export const ELEMENT_COLORS: Record<string, number> = ELEMENT_COLORS_CPK;
 
 // Chain colors - distinct palette for different chains
 export const CHAIN_COLORS: number[] = [
@@ -67,6 +109,21 @@ export function getResidueColor(residueName: string): number {
     return RESIDUE_COLORS[residueName] || 0x808080; // Default gray for unknown
 }
 
-export function getElementColor(element: string): number {
-    return ELEMENT_COLORS[element] || 0xFF00FF; // Default magenta for unknown
+export function getElementColor(element: string, preset: string = 'CPK'): number {
+    let colorMap: Record<string, number>;
+
+    switch (preset.toUpperCase()) {
+        case 'RASMOL':
+            colorMap = ELEMENT_COLORS_RASMOL;
+            break;
+        case 'JMOL':
+            colorMap = ELEMENT_COLORS_JMOL;
+            break;
+        case 'CPK':
+        default:
+            colorMap = ELEMENT_COLORS_CPK;
+            break;
+    }
+
+    return colorMap[element] || 0xFF00FF; // Default magenta for unknown
 }

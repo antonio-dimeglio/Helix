@@ -1,4 +1,4 @@
-import { Protein } from "../PDBParser/Protein";
+import { Protein } from "../../Shared/Protein";
 
 export class ColorContext {
     minResidueNumber: number;

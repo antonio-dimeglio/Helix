@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { ProteinRenderer } from './Renderer/ProteinRenderer';
 import { UIController } from './UI/UIController';
+import { ColorUIController } from './UI/ColorUIController';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0a0a0a);
@@ -14,7 +15,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.z = 5;
 
-const canvasArea = document.getElementById('canvasArea')!;
+const canvasArea = document.getElementById('viewport')!;
 const renderer = new THREE.WebGLRenderer({
     antialias: true,
     powerPreference: 'high-performance'  // Use dedicated GPU if available
@@ -56,6 +57,10 @@ let fpsTime = 0;
 
 const proteinRenderer = new ProteinRenderer(scene);
 const controller = new UIController(proteinRenderer, renderer, scene, camera, controls);
+const colorController = new ColorUIController(proteinRenderer);
+
+// Connect the controllers
+controller.setColorUIController(colorController);
 
 function animate(currentTime: number) {
     requestAnimationFrame(animate);
@@ -72,6 +77,10 @@ function animate(currentTime: number) {
     }
 
     controls.update();
+
+    // Update frustum culling (only updates if camera moved significantly)
+    proteinRenderer.updateCulling();
+
     renderer.render(scene, camera);
 }
 

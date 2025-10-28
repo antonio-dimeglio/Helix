@@ -4,192 +4,323 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helix - Protein Visualization</title>
-    <link rel="stylesheet" href="/src/styles.css">
+    <link rel="stylesheet" href="src/helix.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script type="module" src="src/main.ts"></script>
 </head>
 <body>
-    <div id="canvas-container">
+    <div class="app-container">
         <!-- Top Bar -->
         <div class="top-bar">
-            <div class="hamburger" id="hamburgerBtn">☰</div>
-            <div class="logo">Helix</div>
-            <div class="divider"></div>
-            <div class="quick-action primary" id="loadProteinBtn">Load Protein</div>
-            <div class="spacer"></div>
-            <div class="quick-action" id="exportBtn">Export Image</div>
-            <div class="quick-action" id="helpBtn">Help</div>
+            <div class="app-title">HELIX</div>
+            <div class="protein-name" id="proteinName">No structure loaded</div>
+            <div style="flex: 1;"></div>
+            <div style="display: flex; gap: 8px;">
+                <button class="icon-btn" id="resetCameraBtn" title="Reset Camera">⟲</button>
+                <button class="icon-btn" id="exportBtn" title="Export Image">📷</button>
+                <button class="icon-btn" title="Settings">⚙</button>
+                <button class="icon-btn" title="Help">?</button>
+            </div>
         </div>
 
-        <!-- Toolbar -->
-        <div class="toolbar">
-            <div class="toolbar-group">
-                <span class="toolbar-label">Style:</span>
-                <select id="representation">
-                    <option value="spheres">Ball & Stick</option>
-                    <option value="wireframe">Wireframe</option>
-                    <option value="spacefill">Space Fill</option>
-                    <option value="cartoon">Cartoon</option>
-                </select>
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Tab (outside sidebar) -->
+            <div class="sidebar-tab left" id="left-tab">Controls</div>
+
+            <!-- Left Sidebar -->
+            <div class="sidebar left" id="left-sidebar">
+                <!-- Load Structure Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Load Structure</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="control-group">
+                            <label class="control-label">PDB ID</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="pdbInput" placeholder="e.g. 1CRN" value="1CRN">
+                                <button class="btn btn-primary" id="fetchBtn" style="width: auto; padding: 0 16px;">Fetch</button>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="upload-area" id="uploadArea">
+                            <input type="file" id="pdbFileInput" accept=".pdb, .cif, .mmcif" style="display: none;">
+                            <div class="upload-icon">⬆</div>
+                            <div class="upload-text">Drop PDB/CIF file here</div>
+                            <div class="upload-hint">or click to browse</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Representation Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Representation</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="control-group">
+                            <label class="control-label">Render Mode</label>
+                            <select id="renderSelect">
+                                <option value="spheres" selected>Ball and Stick</option>
+                                <option value="wireframe">Wireframe</option>
+                                <option value="spacefill">Space Fill</option>
+                                <option value="cartoon">Cartoon</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Quality</label>
+                            <select id="qualityPresetSelect">
+                                <option value="ultra-low">Ultra Low (Fastest)</option>
+                                <option value="low">Low (Fast)</option>
+                                <option value="medium" selected>Medium (Balanced)</option>
+                                <option value="high">High (Quality)</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="autoQualityCheckbox" checked>
+                            <label for="autoQualityCheckbox">Auto-adjust quality for performance</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="frustumCullingCheckbox" checked>
+                            <label for="frustumCullingCheckbox">Enable frustum culling (large proteins)</label>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="control-group">
+                            <label class="control-label">Display Options</label>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="showDisulfideBondsCheckbox" checked>
+                                <label for="showDisulfideBondsCheckbox">Show disulfide bonds</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="showWaterCheckbox">
+                                <label for="showWaterCheckbox">Show water molecules</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selection Panel (Future) -->
+                <div class="panel collapsed">
+                    <div class="panel-header">
+                        <span>Selection</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="info-box">
+                            <div class="info-box-title">No Selection</div>
+                            Click atoms, residues, or chains to select
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Measurements Panel (Future) -->
+                <div class="panel collapsed">
+                    <div class="panel-header">
+                        <span>Measurements</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="panel-content">
+                        <div class="info-box">
+                            <div class="info-box-title">Getting Started</div>
+                            Select two atoms to measure distance
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="toolbar-group">
-                <span class="toolbar-label">Color:</span>
-                <select id="colorScheme">
-                    <option value="element">By Element</option>
-                    <option value="chain">By Chain</option>
-                    <option value="residue">By Residue</option>
-                    <option value="secondary">By Secondary Structure</option>
-                    <option value="rainbow">Rainbow</option>
-                    <option value="hydrophobicity">By Hydrophobicity</option>
-                </select>
+            <!-- Main Viewport -->
+            <div class="viewport" id="viewport">
+                <div class="viewport-overlay">
+                    <div class="viewport-stats">
+                        <span class="stat-label">Atoms</span>
+                        <span class="stat-value" id="atomCount">642</span>
+                        <span class="stat-label">Bonds</span>
+                        <span class="stat-value" id="bondCount">635</span>
+                        <span class="stat-label">Chains</span>
+                        <span class="stat-value" id="chainCount">1</span>
+                        <span class="stat-label">Residues</span>
+                        <span class="stat-value" id="residueCount">46</span>
+                        <span class="stat-label">FPS</span>
+                        <span class="stat-value" id="fps">60</span>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="spacer"></div>
+            <!-- Right Tab (outside sidebar) -->
+            <div class="sidebar-tab right" id="right-tab">Colors</div>
 
-            <button id="resetCamera">Reset View</button>
+            <!-- Right Sidebar -->
+            <div class="sidebar right" id="right-sidebar">
+                <!-- Color Scheme Selector -->
+                <div class="panel">
+                    <div class="panel-header no-collapse">
+                        <span>Color Scheme</span>
+                    </div>
+                    <div style="padding: 0;">
+                        <!-- Basic Schemes Category -->
+                        <div class="scheme-category">
+                            <div class="category-header">
+                                <span>Basic Schemes</span>
+                                <span class="chevron">▼</span>
+                            </div>
+                            <div class="category-content">
+                                <div class="scheme-option" data-scheme="element" data-realtime="true">
+                                    <div class="scheme-indicator"></div>
+                                    <div class="scheme-info">
+                                        <div class="scheme-name">By Element</div>
+                                        <div class="scheme-desc">CPK atom colors</div>
+                                    </div>
+                                </div>
+                                <div class="scheme-option" data-scheme="chain" data-realtime="true">
+                                    <div class="scheme-indicator"></div>
+                                    <div class="scheme-info">
+                                        <div class="scheme-name">By Chain</div>
+                                        <div class="scheme-desc">Unique color per chain</div>
+                                    </div>
+                                </div>
+                                <div class="scheme-option" data-scheme="residue" data-realtime="true">
+                                    <div class="scheme-indicator"></div>
+                                    <div class="scheme-info">
+                                        <div class="scheme-name">By Residue</div>
+                                        <div class="scheme-desc">Amino acid type</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Property-Based Category -->
+                        <div class="scheme-category">
+                            <div class="category-header">
+                                <span>Property-Based</span>
+                                <span class="chevron">▼</span>
+                            </div>
+                            <div class="category-content">
+                                <div class="scheme-option active" data-scheme="hydrophobicity" data-realtime="true">
+                                    <div class="scheme-indicator"></div>
+                                    <div class="scheme-info">
+                                        <div class="scheme-name">Hydrophobicity</div>
+                                        <div class="scheme-desc">Kyte-Doolittle scale</div>
+                                    </div>
+                                </div>
+                                <div class="scheme-option" data-scheme="electrostatic" data-realtime="false">
+                                    <div class="scheme-indicator"></div>
+                                    <div class="scheme-info">
+                                        <div class="scheme-name">Electrostatic</div>
+                                        <div class="scheme-desc">Surface charge potential</div>
+                                    </div>
+                                    <span class="scheme-badge compute">Compute</span>
+                                </div>
+                                <div class="scheme-option" data-scheme="bfactor" data-realtime="true">
+                                    <div class="scheme-indicator"></div>
+                                    <div class="scheme-info">
+                                        <div class="scheme-name">B-Factor</div>
+                                        <div class="scheme-desc">Thermal motion</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Structural Category -->
+                        <div class="scheme-category">
+                            <div class="category-header">
+                                <span>Structural</span>
+                                <span class="chevron">▼</span>
+                            </div>
+                            <div class="category-content">
+                                <div class="scheme-option" data-scheme="secondary" data-realtime="true">
+                                    <div class="scheme-indicator"></div>
+                                    <div class="scheme-info">
+                                        <div class="scheme-name">Secondary Structure</div>
+                                        <div class="scheme-desc">Helices, sheets, loops</div>
+                                    </div>
+                                </div>
+                                <div class="scheme-option" data-scheme="rainbow" data-realtime="true">
+                                    <div class="scheme-indicator"></div>
+                                    <div class="scheme-info">
+                                        <div class="scheme-name">Rainbow</div>
+                                        <div class="scheme-desc">N→C terminus gradient</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color Scheme Parameters -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Scheme Parameters</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="panel-content" id="parameter-content">
+                        <!-- Parameters load dynamically -->
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="canvas-area" id="canvasArea"></div>
 
         <!-- Status Bar -->
         <div class="status-bar">
             <div class="status-item">
-                <div class="status-indicator"></div>
-                <strong>Protein:</strong>
-                <span id="proteinName">None</span>
+                <span class="status-indicator" id="statusIndicator"></span>
+                <span id="statusText">Ready</span>
             </div>
             <div class="status-item">
-                <strong>Atoms:</strong>
-                <span id="atomCount">0</span>
+                <span id="qualityStatus">Quality: Medium</span>
             </div>
             <div class="status-item">
-                <strong>Bonds:</strong>
-                <span id="bondCount">0</span>
+                <span id="renderModeStatus">Render: Cartoon</span>
             </div>
             <div class="status-item">
-                <strong>Chains:</strong>
-                <span id="chainCount">0</span>
+                <span id="color-scheme-status">Color: Hydrophobicity</span>
             </div>
+            <div style="flex: 1;"></div>
             <div class="status-item">
-                <strong>Residues:</strong>
-                <span id="residueCount">0</span>
-            </div>
-            <div class="spacer"></div>
-            <div class="status-item">
-                <strong>FPS:</strong>
-                <span id="fps">0</span>
-            </div>
-            <div class="status-item">
-                <strong>Quality:</strong>
-                <span id="qualityIndicator">Medium</span>
-            </div>
-        </div>
-
-        <!-- Sidebar Panel (Hidden by default) -->
-        <div class="sidebar-panel" id="sidebarPanel">
-            <div class="panel-section">
-                <div class="panel-title">Load Protein</div>
-                <div class="panel-control">
-                    <label>Search RCSB:</label>
-                    <div class="search-container">
-                        <input type="text" id="pdbSearch" placeholder="Enter PDB ID (e.g., 1CRN)">
-                        <button id="fetchBtn">Fetch</button>
-                    </div>
-                </div>
-                <div class="panel-control">
-                    <label>Upload File:</label>
-                    <input type="file" id="pdbFile" accept=".pdb">
-                </div>
-                <div class="loading" id="loadingIndicator">Loading protein...</div>
-                <div class="warning" id="performanceWarning">
-                    Large protein detected. Consider using Wireframe mode for better performance.
-                </div>
-            </div>
-
-            <div class="panel-section">
-                <div class="panel-title">Quality Settings</div>
-                <div class="panel-control">
-                    <label>Rendering Quality:</label>
-                    <select id="qualityPreset">
-                        <option value="low">Low (Fastest)</option>
-                        <option value="medium" selected>Medium (Balanced)</option>
-                        <option value="high">High (Best Quality)</option>
-                    </select>
-                </div>
-                <div class="panel-control">
-                    <label>Sphere Detail:</label>
-                    <select id="sphereDetail">
-                        <option value="4">4×4 (Very Low)</option>
-                        <option value="8">8×8 (Low)</option>
-                        <option value="16" selected>16×16 (Medium)</option>
-                        <option value="32">32×32 (High)</option>
-                    </select>
-                </div>
-                <div class="panel-control">
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="autoQuality" checked>
-                        Auto-adjust quality for large proteins
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Help Modal -->
-        <div class="help-modal" id="helpModal">
-            <div class="help-content">
-                <div class="help-header">
-                    <h2>Helix - Quick Start Guide</h2>
-                    <button class="close-btn" id="closeHelpBtn">×</button>
-                </div>
-                <div class="help-body">
-                    <section>
-                        <h3>Loading Proteins</h3>
-                        <ul>
-                            <li><strong>From RCSB:</strong> Click "Load Protein" or the hamburger menu, enter a PDB ID (e.g., 1CRN, 1UBQ, 1HHO), and click Fetch</li>
-                            <li><strong>Upload File:</strong> Use the file input in the sidebar to upload your own .pdb file</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h3>Visualization Styles</h3>
-                        <ul>
-                            <li><strong>Ball & Stick:</strong> Shows atoms as spheres with bonds as cylinders</li>
-                            <li><strong>Wireframe:</strong> Shows only bonds (best for large proteins)</li>
-                            <li><strong>Space Fill:</strong> Shows atoms at Van der Waals radii (can be slow for large proteins)</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h3>Color Schemes</h3>
-                        <ul>
-                            <li><strong>By Element:</strong> Standard CPK coloring (Carbon=gray, Oxygen=red, Nitrogen=blue, etc.)</li>
-                            <li><strong>By Chain:</strong> Each protein chain gets a distinct color</li>
-                            <li><strong>By Residue:</strong> Colors based on amino acid properties (hydrophobic, polar, acidic, basic)</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h3>Controls</h3>
-                        <ul>
-                            <li><strong>Rotate:</strong> Left click and drag</li>
-                            <li><strong>Pan:</strong> Right click and drag</li>
-                            <li><strong>Zoom:</strong> Scroll wheel or pinch</li>
-                            <li><strong>Reset View:</strong> Click "Reset View" button in toolbar</li>
-                        </ul>
-                    </section>
-
-                    <section>
-                        <h3>Performance Tips</h3>
-                        <ul>
-                            <li>For proteins &gt; 5000 atoms, use Wireframe mode for better performance</li>
-                            <li>Enable "Auto-adjust quality" to automatically optimize for large proteins</li>
-                            <li>Lower sphere detail in Quality Settings if experiencing lag</li>
-                        </ul>
-                    </section>
-                </div>
+                <span>v0.1.0-alpha</span>
             </div>
         </div>
     </div>
 
-    <script type="module" src="/src/main.ts"></script>
+    <script>
+        // Sidebar toggle functionality
+        const leftSidebar = document.getElementById('left-sidebar');
+        const rightSidebar = document.getElementById('right-sidebar');
+        const leftTab = document.getElementById('left-tab');
+        const rightTab = document.getElementById('right-tab');
+
+        // Start with left sidebar open, right sidebar hidden
+        leftTab.classList.add('sidebar-open');
+        rightSidebar.classList.add('collapsed');
+
+        leftTab.addEventListener('click', () => {
+            leftSidebar.classList.toggle('collapsed');
+            leftTab.classList.toggle('sidebar-open');
+        });
+
+        rightTab.addEventListener('click', () => {
+            rightSidebar.classList.toggle('collapsed');
+            rightTab.classList.toggle('sidebar-open');
+        });
+
+        // Panel collapse functionality
+        document.querySelectorAll('.panel-header').forEach(header => {
+            if (!header.classList.contains('no-collapse')) {
+                header.addEventListener('click', function() {
+                    this.parentElement.classList.toggle('collapsed');
+                });
+            }
+        });
+
+        // Category collapse functionality
+        document.querySelectorAll('.category-header').forEach(header => {
+            header.addEventListener('click', function() {
+                this.parentElement.classList.toggle('collapsed');
+            });
+        });
+    </script>
 </body>
 </html>
