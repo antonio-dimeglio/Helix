@@ -25,6 +25,22 @@ import { ChunkedAtomRenderer } from "./ChunkedAtomRenderer";
 
 export { RenderMode };
 
+interface ProteinRenderData {
+    proteinId: string;
+    protein: Protein;
+    atomMesh: InstancedMesh | null;
+    bondMesh: InstancedMesh | null;
+    cartoonMesh: Group | null;
+    disulfideMesh: InstancedMesh | null;
+    waterMesh: InstancedMesh | null;
+    chunkedAtomRenderer: ChunkedAtomRenderer | null;
+    chunkedWaterRenderer: ChunkedAtomRenderer | null;
+    colorContext: ColorContext;
+    colorScheme: ColorScheme;
+    renderMode: RenderMode;
+    spatialOffset: Vector3;
+}
+
 export class ProteinRenderer {
     private atomMesh: InstancedMesh | null;
     private bondMesh: InstancedMesh | null;
@@ -32,6 +48,7 @@ export class ProteinRenderer {
     private disulfideMesh: InstancedMesh | null;
     private colorContext: ColorContext | null;
     private protein: Protein | null;
+    private loadedProteins: Map<string, ProteinRenderData>;
     private scene: Scene;
     private currentColorScheme: ColorScheme | null;
     private renderMode: RenderMode;
@@ -90,10 +107,11 @@ export class ProteinRenderer {
             new ElectrostaticColorScheme()
         ];
         schemes.forEach(scheme => this.colorSchemeRegistry.registerColorScheme(scheme));
-        
+
         this.boundingBox = null;
         this.center = null;
         this.radius = null;
+        this.loadedProteins = new Map();
     }
 
     loadProtein(protein: Protein, renderMode: RenderMode = RenderMode.BallAndStick, colorScheme?: ColorScheme) {
@@ -478,6 +496,8 @@ export class ProteinRenderer {
 
         this.camera = camera;
 
+        this.recalculateSceneBounds();
+
         if (!this.boundingBox  ||
             !this.center||
             !this.radius ) {
@@ -502,12 +522,417 @@ export class ProteinRenderer {
         }
     }
 
+    public applyColorSchemeToProtein(proteinId: string, colorScheme: ColorScheme): boolean {
+        const renderData = this.loadedProteins.get(proteinId);
+        if (!renderData) {
+            console.warn(`Cannot apply color scheme to protein ${proteinId}: not found`);
+            return false;
+        }
+
+        // Store the new color scheme
+        renderData.colorScheme = colorScheme;
+
+        // Re-render the protein with the new color scheme
+        this.renderProteinById(proteinId, renderData.renderMode, colorScheme);
+
+        // Reapply the stored spatial offset
+        this.applyOffsetToProtein(proteinId, renderData.spatialOffset);
+
+        console.log(`Applied color scheme ${colorScheme.id} to protein ${proteinId} at offset ${renderData.spatialOffset.toArray()}`);
+        return true;
+    }
+
+    public getProteinColorScheme(proteinId: string): ColorScheme | null {
+        const renderData = this.loadedProteins.get(proteinId);
+        return renderData ? renderData.colorScheme : null;
+    }
+
+    public getProteinRenderMode(proteinId: string): RenderMode | null {
+        const renderData = this.loadedProteins.get(proteinId);
+        return renderData ? renderData.renderMode : null;
+    }
+
+    public getProteinColorContext(proteinId: string): ColorContext | null {
+        const renderData = this.loadedProteins.get(proteinId);
+        return renderData ? renderData.colorContext : null;
+    }
+
+    focusOnProtein(proteinId: string, camera: PerspectiveCamera, controls: OrbitControls): boolean {
+        const renderData = this.loadedProteins.get(proteinId);
+        if (!renderData) {
+            console.warn(`Cannot focus on protein ${proteinId}: not found`);
+            return false;
+        }
+
+        this.camera = camera;
+
+        const proteinBox = new Box3();
+        renderData.protein.atoms.forEach(atom => {
+            proteinBox.expandByPoint(new Vector3(atom.x, atom.y, atom.z));
+        });
+
+        // Use the stored spatial offset
+        const offset = renderData.spatialOffset;
+
+        const min = proteinBox.min.clone().add(offset);
+        const max = proteinBox.max.clone().add(offset);
+        const adjustedBox = new Box3(min, max);
+
+        const center = new Vector3();
+        adjustedBox.getCenter(center);
+
+        const size = new Vector3();
+        adjustedBox.getSize(size);
+        const radius = size.length() / 2;
+
+        camera.lookAt(center);
+
+        const distance = radius / Math.tan((camera.fov / 2) * (Math.PI / 180)) * 1.5;
+        camera.position.set(
+            center.x + distance,
+            center.y + distance * 0.5,
+            center.z + distance
+        );
+
+        controls.target.copy(center);
+        controls.update();
+
+        if (this.camera) {
+            this.updateCulling();
+        }
+
+        console.log(`Focused on protein ${proteinId} at position ${offset.toArray()}`);
+        return true;
+    }
+
+    private recalculateSceneBounds(): void {
+        const allProteins = Array.from(this.loadedProteins.values());
+
+        if (allProteins.length === 0) {
+            if (this.protein) {
+                return;
+            }
+            this.boundingBox = null;
+            this.center = null;
+            this.radius = null;
+            return;
+        }
+
+        const sceneBounds = new Box3();
+
+        allProteins.forEach(renderData => {
+            const proteinBox = new Box3();
+            renderData.protein.atoms.forEach(atom => {
+                proteinBox.expandByPoint(new Vector3(atom.x, atom.y, atom.z));
+            });
+
+            if (renderData.atomMesh) {
+                const offset = renderData.atomMesh.position;
+                const min = proteinBox.min.clone().add(offset);
+                const max = proteinBox.max.clone().add(offset);
+                sceneBounds.expandByPoint(min);
+                sceneBounds.expandByPoint(max);
+            } else if (renderData.cartoonMesh) {
+                const offset = renderData.cartoonMesh.position;
+                const min = proteinBox.min.clone().add(offset);
+                const max = proteinBox.max.clone().add(offset);
+                sceneBounds.expandByPoint(min);
+                sceneBounds.expandByPoint(max);
+            } else {
+                sceneBounds.union(proteinBox);
+            }
+        });
+
+        this.boundingBox = sceneBounds;
+        this.center = new Vector3();
+        sceneBounds.getCenter(this.center);
+
+        const size = new Vector3();
+        sceneBounds.getSize(size);
+        this.radius = size.length() / 2;
+
+        console.log(`Scene bounds updated: center=${this.center.toArray()}, radius=${this.radius.toFixed(2)}`);
+    }
+
     
     public hasProtein(): boolean {
         return this.protein !== null;
     }
 
-    
+    public addProteinToScene(proteinId: string, protein: Protein, renderMode: RenderMode): void {
+        if (this.loadedProteins.has(proteinId)) {
+            console.warn(`Protein ${proteinId} already in scene`);
+            return;
+        }
+
+        const colorContext = new ColorContext(protein);
+
+        // For small molecules (few atoms, no chains), always use element coloring
+        const isSmallMolecule = protein.atoms.length < 100 && protein.numChains === 1;
+        const colorScheme = isSmallMolecule
+            ? new ElementColorScheme()
+            : (this.currentColorScheme || new ElementColorScheme());
+
+        const spatialOffset = this.calculateSpatialOffset(protein);
+
+        const renderData: ProteinRenderData = {
+            proteinId,
+            protein,
+            atomMesh: null,
+            bondMesh: null,
+            cartoonMesh: null,
+            disulfideMesh: null,
+            waterMesh: null,
+            chunkedAtomRenderer: null,
+            chunkedWaterRenderer: null,
+            colorContext,
+            colorScheme,
+            renderMode,
+            spatialOffset
+        };
+
+        this.loadedProteins.set(proteinId, renderData);
+
+        this.renderProteinById(proteinId, renderMode, colorScheme);
+
+        this.applyOffsetToProtein(proteinId, spatialOffset);
+    }
+
+    private calculateSpatialOffset(protein: Protein): Vector3 {
+        const existingProteins = Array.from(this.loadedProteins.values());
+
+        if (existingProteins.length === 0) {
+            return new Vector3(0, 0, 0);
+        }
+
+        const proteinBox = new Box3();
+        protein.atoms.forEach(atom => {
+            proteinBox.expandByPoint(new Vector3(atom.x, atom.y, atom.z));
+        });
+
+        const proteinSize = new Vector3();
+        proteinBox.getSize(proteinSize);
+        const maxDimension = Math.max(proteinSize.x, proteinSize.y, proteinSize.z);
+
+        const separationDistance = maxDimension * 2.5;
+
+        const offsetX = existingProteins.length * separationDistance;
+
+        return new Vector3(offsetX, 0, 0);
+    }
+
+    private applyOffsetToProtein(proteinId: string, offset: Vector3): void {
+        const renderData = this.loadedProteins.get(proteinId);
+        if (!renderData) return;
+
+        if (renderData.atomMesh) {
+            renderData.atomMesh.position.copy(offset);
+        }
+        if (renderData.bondMesh) {
+            renderData.bondMesh.position.copy(offset);
+        }
+        if (renderData.cartoonMesh) {
+            renderData.cartoonMesh.position.copy(offset);
+        }
+        if (renderData.disulfideMesh) {
+            renderData.disulfideMesh.position.copy(offset);
+        }
+        if (renderData.waterMesh) {
+            renderData.waterMesh.position.copy(offset);
+        }
+    }
+
+    private renderProteinById(proteinId: string, renderMode: RenderMode, colorScheme: ColorScheme): void {
+        const renderData = this.loadedProteins.get(proteinId);
+        if (!renderData) return;
+
+        const protein = renderData.protein;
+        const colorContext = renderData.colorContext;
+
+        this.clearProteinMeshes(proteinId);
+
+        switch (renderMode) {
+            case RenderMode.BallAndStick:
+                this.renderBallAndStickForProtein(renderData, colorScheme);
+                break;
+            case RenderMode.Wireframe:
+                this.renderWireframeForProtein(renderData, colorScheme);
+                break;
+            case RenderMode.SpaceFill:
+                this.renderSpaceFillForProtein(renderData, colorScheme);
+                break;
+            case RenderMode.Cartoon:
+                this.renderCartoonForProtein(renderData, colorScheme);
+                break;
+        }
+    }
+
+    private clearProteinMeshes(proteinId: string): void {
+        const renderData = this.loadedProteins.get(proteinId);
+        if (!renderData) return;
+
+        if (renderData.atomMesh) {
+            this.scene.remove(renderData.atomMesh);
+            renderData.atomMesh.geometry.dispose();
+            (renderData.atomMesh.material as any).dispose();
+            renderData.atomMesh = null;
+        }
+
+        if (renderData.bondMesh) {
+            this.scene.remove(renderData.bondMesh);
+            renderData.bondMesh.geometry.dispose();
+            (renderData.bondMesh.material as any).dispose();
+            renderData.bondMesh = null;
+        }
+
+        if (renderData.cartoonMesh) {
+            this.scene.remove(renderData.cartoonMesh);
+            renderData.cartoonMesh = null;
+        }
+
+        if (renderData.disulfideMesh) {
+            this.scene.remove(renderData.disulfideMesh);
+            renderData.disulfideMesh.geometry.dispose();
+            (renderData.disulfideMesh.material as any).dispose();
+            renderData.disulfideMesh = null;
+        }
+
+        if (renderData.waterMesh) {
+            this.scene.remove(renderData.waterMesh);
+            renderData.waterMesh.geometry.dispose();
+            (renderData.waterMesh.material as any).dispose();
+            renderData.waterMesh = null;
+        }
+    }
+
+    private renderBallAndStickForProtein(renderData: ProteinRenderData, colorScheme: ColorScheme): void {
+        const protein = renderData.protein;
+        const filteredAtoms = protein.atoms.filter(atom => !isWaterAtom(atom));
+
+        renderData.atomMesh = createAtomsMesh(filteredAtoms, colorScheme, renderData.colorContext, 0.3);
+        if (renderData.atomMesh) this.scene.add(renderData.atomMesh);
+
+        renderData.bondMesh = createBondsMesh(protein.atoms, protein.bonds);
+        if (renderData.bondMesh) this.scene.add(renderData.bondMesh);
+
+        if (this.showDisulfideBonds) {
+            const disulfideBonds = this.disulfideRenderer.detectDisulfideBonds(protein.atoms);
+            renderData.disulfideMesh = this.disulfideRenderer.createDisulfideBondsMesh(protein.atoms, disulfideBonds);
+            if (renderData.disulfideMesh) this.scene.add(renderData.disulfideMesh);
+        }
+    }
+
+    private renderWireframeForProtein(renderData: ProteinRenderData, colorScheme: ColorScheme): void {
+        const protein = renderData.protein;
+
+        renderData.bondMesh = createBondsMesh(protein.atoms, protein.bonds);
+        if (renderData.bondMesh) this.scene.add(renderData.bondMesh);
+
+        if (this.showDisulfideBonds) {
+            const disulfideBonds = this.disulfideRenderer.detectDisulfideBonds(protein.atoms);
+            renderData.disulfideMesh = this.disulfideRenderer.createDisulfideBondsMesh(protein.atoms, disulfideBonds);
+            if (renderData.disulfideMesh) this.scene.add(renderData.disulfideMesh);
+        }
+    }
+
+    private renderSpaceFillForProtein(renderData: ProteinRenderData, colorScheme: ColorScheme): void {
+        const protein = renderData.protein;
+        const filteredAtoms = protein.atoms.filter(atom => !isWaterAtom(atom));
+
+        const maxRadius = Math.max(...filteredAtoms.map(atom => VDW_RADII[atom.element] || 1.7));
+
+        renderData.atomMesh = createAtomsMesh(filteredAtoms, colorScheme, renderData.colorContext, maxRadius);
+        if (renderData.atomMesh) this.scene.add(renderData.atomMesh);
+
+        if (this.showDisulfideBonds) {
+            const disulfideBonds = this.disulfideRenderer.detectDisulfideBonds(protein.atoms);
+            renderData.disulfideMesh = this.disulfideRenderer.createDisulfideBondsMesh(protein.atoms, disulfideBonds);
+            if (renderData.disulfideMesh) this.scene.add(renderData.disulfideMesh);
+        }
+    }
+
+    private renderCartoonForProtein(renderData: ProteinRenderData, colorScheme: ColorScheme): void {
+        const protein = renderData.protein;
+        renderData.cartoonMesh = this.cartoonRenderer.createCartoonMesh(
+            protein.backboneChains,
+            protein.secondaryStructure,
+            colorScheme,
+            renderData.colorContext
+        );
+        if (renderData.cartoonMesh) this.scene.add(renderData.cartoonMesh);
+
+        if (this.showDisulfideBonds) {
+            const disulfideBonds = this.disulfideRenderer.detectDisulfideBonds(protein.atoms);
+            renderData.disulfideMesh = this.disulfideRenderer.createDisulfideBondsMesh(protein.atoms, disulfideBonds);
+            if (renderData.disulfideMesh) this.scene.add(renderData.disulfideMesh);
+        }
+    }
+
+    public removeProteinFromScene(proteinId: string): void {
+        const renderData = this.loadedProteins.get(proteinId);
+        if (!renderData) {
+            console.warn(`Protein ${proteinId} not found in scene`);
+            return;
+        }
+
+        if (renderData.atomMesh) {
+            this.scene.remove(renderData.atomMesh);
+            renderData.atomMesh.geometry.dispose();
+            (renderData.atomMesh.material as any).dispose();
+        }
+
+        if (renderData.bondMesh) {
+            this.scene.remove(renderData.bondMesh);
+            renderData.bondMesh.geometry.dispose();
+            (renderData.bondMesh.material as any).dispose();
+        }
+
+        if (renderData.cartoonMesh) {
+            this.scene.remove(renderData.cartoonMesh);
+            renderData.cartoonMesh.traverse((child) => {
+                if (child instanceof InstancedMesh) {
+                    child.geometry.dispose();
+                    (child.material as any).dispose();
+                }
+            });
+        }
+
+        if (renderData.disulfideMesh) {
+            this.scene.remove(renderData.disulfideMesh);
+            renderData.disulfideMesh.geometry.dispose();
+            (renderData.disulfideMesh.material as any).dispose();
+        }
+
+        if (renderData.waterMesh) {
+            this.scene.remove(renderData.waterMesh);
+            renderData.waterMesh.geometry.dispose();
+            (renderData.waterMesh.material as any).dispose();
+        }
+
+        if (renderData.chunkedAtomRenderer) {
+            renderData.chunkedAtomRenderer.dispose();
+        }
+
+        if (renderData.chunkedWaterRenderer) {
+            renderData.chunkedWaterRenderer.dispose();
+        }
+
+        this.loadedProteins.delete(proteinId);
+        console.log(`Removed protein ${proteinId} from scene and memory`);
+    }
+
+    public setProteinVisibility(proteinId: string, visible: boolean): void {
+        const renderData = this.loadedProteins.get(proteinId);
+        if (!renderData) return;
+
+        if (renderData.atomMesh) renderData.atomMesh.visible = visible;
+        if (renderData.bondMesh) renderData.bondMesh.visible = visible;
+        if (renderData.cartoonMesh) renderData.cartoonMesh.visible = visible;
+        if (renderData.disulfideMesh) renderData.disulfideMesh.visible = visible;
+        if (renderData.waterMesh) renderData.waterMesh.visible = visible;
+    }
+
+
     public getColorSchemeRegistry(): ColorSchemeRegistry {
         return this.colorSchemeRegistry;
     }

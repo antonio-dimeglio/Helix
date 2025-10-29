@@ -6,6 +6,7 @@ import { RenderMode } from "../Renderer/RenderMode";
 export class ColorUIController {
     private proteinRenderer: ProteinRenderer;
     private currentScheme: ColorScheme | null;
+    private currentProteinId: string | null;
     private parameterContent: HTMLElement;
     private schemeOptions: NodeListOf<Element>;
     private statusText: HTMLElement;
@@ -14,6 +15,7 @@ export class ColorUIController {
     constructor(proteinRenderer: ProteinRenderer) {
         this.proteinRenderer = proteinRenderer;
         this.currentScheme = null;
+        this.currentProteinId = null;
 
         this.parameterContent = null!;
         this.schemeOptions = null!;
@@ -23,6 +25,21 @@ export class ColorUIController {
         this.initializeElements();
         this.attachEventListeners();
         this.setInitialScheme();
+    }
+
+    public setCurrentProtein(proteinId: string | null): void {
+        this.currentProteinId = proteinId;
+
+        // Load the current color scheme for this protein
+        if (proteinId) {
+            const colorScheme = this.proteinRenderer.getProteinColorScheme(proteinId);
+            if (colorScheme) {
+                this.currentScheme = colorScheme;
+                this.updateUIForScheme(colorScheme.id);
+                this.displayParameters(colorScheme);
+                console.log(`Color UI updated for protein ${proteinId}: ${colorScheme.id}`);
+            }
+        }
     }
 
     private initializeElements(): void {
@@ -52,6 +69,16 @@ export class ColorUIController {
         }
     }
 
+    private updateUIForScheme(schemeId: string): void {
+        this.schemeOptions.forEach(option => {
+            if (option.getAttribute('data-scheme') === schemeId) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
+            }
+        });
+    }
+
     private onSchemeSelected(schemeId: string): void {
         // Get scheme from registry
         const scheme = this.proteinRenderer.getColorSchemeRegistry().get(schemeId);
@@ -61,13 +88,7 @@ export class ColorUIController {
         }
 
         // Update active state in UI
-        this.schemeOptions.forEach(option => {
-            if (option.getAttribute('data-scheme') === schemeId) {
-                option.classList.add('active');
-            } else {
-                option.classList.remove('active');
-            }
-        });
+        this.updateUIForScheme(schemeId);
 
         // Store current scheme
         this.currentScheme = scheme;
@@ -75,8 +96,11 @@ export class ColorUIController {
         // Display parameters
         this.displayParameters(scheme);
 
-        // Apply scheme to protein if loaded
-        if (this.proteinRenderer.hasProtein()) {
+        // Apply scheme to selected protein if one is selected
+        if (this.currentProteinId) {
+            this.applyScheme(scheme);
+        } else if (this.proteinRenderer.hasProtein()) {
+            // Fallback to old behavior for compatibility
             this.applyScheme(scheme);
         }
     }
@@ -181,35 +205,68 @@ export class ColorUIController {
     }
 
     private async applyScheme(scheme: ColorScheme): Promise<void> {
-        if (!this.proteinRenderer.hasProtein()) {
-            return;
-        }
-
-        // Check if scheme requires precomputation
-        if (scheme.requiresPrecomputation()) {
-            // Show computing state
-            this.statusIndicator.classList.add('computing');
-            this.statusText.textContent = 'Computing color scheme...';
-
-            try {
-                const protein = this.proteinRenderer.getColorContext();
-                if (protein) {
-                    await scheme.precompute(protein.protein);
-                }
-            } catch (error) {
-                console.error('Error during color scheme precomputation:', error);
-                this.statusText.textContent = 'Error computing colors';
-                this.statusIndicator.classList.remove('computing');
+        // If a specific protein is selected, apply to it
+        if (this.currentProteinId) {
+            const colorContext = this.proteinRenderer.getProteinColorContext(this.currentProteinId);
+            if (!colorContext) {
+                console.warn(`Cannot apply color scheme: protein ${this.currentProteinId} not found`);
                 return;
             }
 
-            // Remove computing state
-            this.statusIndicator.classList.remove('computing');
-            this.statusText.textContent = 'Ready';
-        }
+            // Check if scheme requires precomputation
+            if (scheme.requiresPrecomputation()) {
+                // Show computing state
+                this.statusIndicator.classList.add('computing');
+                this.statusText.textContent = 'Computing color scheme...';
 
-        // Apply colors to protein
-        this.proteinRenderer.recolorProtein(scheme);
+                try {
+                    await scheme.precompute(colorContext.protein);
+                } catch (error) {
+                    console.error('Error during color scheme precomputation:', error);
+                    this.statusText.textContent = 'Error computing colors';
+                    this.statusIndicator.classList.remove('computing');
+                    return;
+                }
+
+                // Remove computing state
+                this.statusIndicator.classList.remove('computing');
+                this.statusText.textContent = 'Ready';
+            }
+
+            // Apply color scheme to the specific protein
+            this.proteinRenderer.applyColorSchemeToProtein(this.currentProteinId, scheme);
+        } else {
+            // Fallback to old behavior if no protein is selected
+            if (!this.proteinRenderer.hasProtein()) {
+                return;
+            }
+
+            // Check if scheme requires precomputation
+            if (scheme.requiresPrecomputation()) {
+                // Show computing state
+                this.statusIndicator.classList.add('computing');
+                this.statusText.textContent = 'Computing color scheme...';
+
+                try {
+                    const protein = this.proteinRenderer.getColorContext();
+                    if (protein) {
+                        await scheme.precompute(protein.protein);
+                    }
+                } catch (error) {
+                    console.error('Error during color scheme precomputation:', error);
+                    this.statusText.textContent = 'Error computing colors';
+                    this.statusIndicator.classList.remove('computing');
+                    return;
+                }
+
+                // Remove computing state
+                this.statusIndicator.classList.remove('computing');
+                this.statusText.textContent = 'Ready';
+            }
+
+            // Apply colors to protein
+            this.proteinRenderer.recolorProtein(scheme);
+        }
     }
 
     /**

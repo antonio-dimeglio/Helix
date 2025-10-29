@@ -125,5 +125,7 @@ export function getElementColor(element: string, preset: string = 'CPK'): number
             break;
     }
 
-    return colorMap[element] || 0xFF00FF; // Default magenta for unknown
+    // Normalize element to uppercase for color map lookup
+    const normalizedElement = element.toUpperCase();
+    return colorMap[normalizedElement] || 0xFF00FF; // Default magenta for unknown
 }

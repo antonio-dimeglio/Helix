@@ -38,19 +38,47 @@
                     </div>
                     <div class="panel-content">
                         <div class="control-group">
-                            <label class="control-label">PDB ID</label>
+                            <label class="control-label">Source</label>
+                            <select id="sourceSelect">
+                                <option value="pdb" selected>PDB (Protein Data Bank)</option>
+                                <option value="pubchem">PubChem (Small Molecules)</option>
+                                <option value="chembl">ChEMBL (Drug Database)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" id="fetchInputLabel">PDB ID</label>
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="pdbInput" placeholder="e.g. 1CRN" value="1CRN">
+                                <input type="text" id="fetchInput" placeholder="e.g. 1CRN" value="">
                                 <button class="btn btn-primary" id="fetchBtn" style="width: auto; padding: 0 16px;">Fetch</button>
                             </div>
+                            <div class="upload-hint" id="fetchHint" style="margin-top: 4px;">4-letter PDB code</div>
                         </div>
                         <div class="divider"></div>
                         <div class="upload-area" id="uploadArea">
-                            <input type="file" id="pdbFileInput" accept=".pdb, .cif, .mmcif" style="display: none;">
+                            <input type="file" id="pdbFileInput" accept=".pdb, .cif, .mmcif, .sdf, .mol, .mol2, .pdbqt, .xyz" multiple style="display: none;">
                             <div class="upload-icon">⬆</div>
-                            <div class="upload-text">Drop PDB/CIF file here</div>
-                            <div class="upload-hint">or click to browse</div>
+                            <div class="upload-text">Drop structure file here</div>
+                            <div class="upload-hint">PDB, CIF, SDF, MOL2, PDBQT</div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Loaded Proteins Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Loaded Proteins</span>
+                        <span class="chevron">▼</span>
+                    </div>
+                    <div class="panel-content">
+                        <div id="proteinListContainer" class="protein-list">
+                            <div class="info-box">
+                                <div class="info-box-title">No Proteins Loaded</div>
+                                Load a protein to get started
+                            </div>
+                        </div>
+                        <button id="simulateDockingBtn" class="btn btn-primary" style="width: 100%; margin-top: 12px;" disabled>
+                            Simulate Docking
+                        </button>
                     </div>
                 </div>
 
@@ -168,7 +196,7 @@
                                 <span class="chevron">▼</span>
                             </div>
                             <div class="category-content">
-                                <div class="scheme-option" data-scheme="element" data-realtime="true">
+                                <div class="scheme-option active" data-scheme="element" data-realtime="true">
                                     <div class="scheme-indicator"></div>
                                     <div class="scheme-info">
                                         <div class="scheme-name">By Element</div>
@@ -199,7 +227,7 @@
                                 <span class="chevron">▼</span>
                             </div>
                             <div class="category-content">
-                                <div class="scheme-option active" data-scheme="hydrophobicity" data-realtime="true">
+                                <div class="scheme-option" data-scheme="hydrophobicity" data-realtime="true">
                                     <div class="scheme-indicator"></div>
                                     <div class="scheme-info">
                                         <div class="scheme-name">Hydrophobicity</div>
@@ -276,7 +304,7 @@
                 <span id="renderModeStatus">Render: Cartoon</span>
             </div>
             <div class="status-item">
-                <span id="color-scheme-status">Color: Hydrophobicity</span>
+                <span id="color-scheme-status">Color: By Element</span>
             </div>
             <div style="flex: 1;"></div>
             <div class="status-item">
@@ -322,5 +350,38 @@
             });
         });
     </script>
+
+    <!-- Docking Simulation Modal -->
+    <div id="dockingModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Simulate Docking</h2>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <label class="control-label">Receptor Protein</label>
+                    <select id="receptorSelect" class="modal-select">
+                        <option value="">Select receptor protein...</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Ligand Protein</label>
+                    <select id="ligandSelect" class="modal-select">
+                        <option value="">Select ligand protein...</option>
+                    </select>
+                </div>
+                <div class="info-box" style="margin-top: 16px;">
+                    <div class="info-box-title">About Docking</div>
+                    Select two proteins to simulate molecular docking. The receptor is typically the larger protein, and the ligand is the smaller molecule that binds to it.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelDockingBtn" class="btn">Cancel</button>
+                <button id="runDockingBtn" class="btn btn-primary" disabled>Run Simulation</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
